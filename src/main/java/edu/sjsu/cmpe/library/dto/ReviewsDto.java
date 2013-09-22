@@ -6,11 +6,11 @@ import edu.sjsu.cmpe.library.domain.Reviews;
 
 public class ReviewsDto {
 
-	 public ArrayList<Reviews> reviews=null;
+	 public ArrayList  reviews=null;
 	 
 	 
-	 public ReviewsDto(ArrayList<Reviews> rev2) {
-			this.reviews = rev2;
+	 public ReviewsDto(ArrayList reviews2) {
+			this.reviews = reviews2;
 		}
 
 	 
@@ -18,7 +18,7 @@ public class ReviewsDto {
 			return reviews;
 		}*/
 
-		public void setRev2(ArrayList<Reviews> reviews) {
+		public void setRev2(ArrayList reviews) {
 			this.reviews = reviews;
 		}
 	 

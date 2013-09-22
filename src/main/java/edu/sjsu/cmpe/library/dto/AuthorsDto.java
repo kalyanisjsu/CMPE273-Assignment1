@@ -1,16 +1,17 @@
 package edu.sjsu.cmpe.library.dto;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import edu.sjsu.cmpe.library.domain.Author;
 
-public class AuthorsDto {
+public class AuthorsDto extends LinksDto{
 
- public ArrayList<Author> author=null;
+ public Collection<Author> author=null;
 	 
 	 
-	 public AuthorsDto(ArrayList<Author> authors) {
-			this.author = authors;
+	 public AuthorsDto(Collection<Author> collection) {
+			this.author = collection;
 		}
 
 
