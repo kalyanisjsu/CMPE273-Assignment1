@@ -12,7 +12,7 @@ public class Author{
 		private Long ID=null;
 	    private String Name=null;;
 	    
-	    public Long create_id()
+	    public Long createAuthorID()
 	    {
 	      	 Random randomGenerator = new Random();
 	         for (int i = 1; i <= 50; ++i)

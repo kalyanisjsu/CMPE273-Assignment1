@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -38,7 +39,6 @@ import com.yammer.metrics.annotation.Timed;
 
 import edu.sjsu.cmpe.library.LibraryService;
 import edu.sjsu.cmpe.library.domain.Author;
-import edu.sjsu.cmpe.library.domain.AuthorLink;
 import edu.sjsu.cmpe.library.domain.Book;
 import edu.sjsu.cmpe.library.domain.BookRequest;
 import edu.sjsu.cmpe.library.domain.Reviews;
@@ -83,6 +83,7 @@ public class BookResource {
 		bookResponse.addLink(new LinkDto("update-book","/books/" + isbn, "PUT"));
 		bookResponse.addLink(new LinkDto("delete-book","/books/" + isbn, "DELETE"));
 		bookResponse.addLink(new LinkDto("create-review","/books/" + isbn +"/reviews", "POST"));
+		if(allreviews.size()>0)
 		bookResponse.addLink(new LinkDto("view-all-reviews","/books/" + isbn + "/reviews", "GET"));
 		return Response.ok(bookResponse).build();
 
@@ -94,7 +95,7 @@ public class BookResource {
 
 	// public BookDto createBook(@QueryParam("title")String title, @QueryParam("publication-date") String publication_date, @QueryParam("language") String language,  @QueryParam("num-pages") int num_pages ,@QueryParam("status") String status) throws JsonGenerationException, JsonMappingException, IOException
 
-	public Response createBook(BookRequest bookRequest)
+	public Response createBook(@Valid BookRequest bookRequest)
 	{
 		ArrayList<LinkDto> authors = new ArrayList();
 		Book book = new Book(bookRequest.getTitle(), bookRequest.getAuthors(),bookRequest.getLanguage(),bookRequest.getNum_pages(),bookRequest.getPublication_date(),bookRequest.getStatus(),bookRequest.getReviews());
@@ -104,7 +105,7 @@ public class BookResource {
 		Map<Long,Author> authorMap =  new HashMap<Long, Author>();
 		for(Author author: bookRequest.getAuthors())
 		{
-			Long author_id = author.create_id();
+			Long author_id = author.createAuthorID();
 			authorMap.put(author_id, author);
 			authors.add(new LinkDto("view-author","/books/" + new_isbn + "/authors/" + author_id , "GET"));
 		}
@@ -151,7 +152,7 @@ public class BookResource {
 		bookResponse.addLink(new LinkDto("update-book","/books/" + isbn, "PUT"));
 		bookResponse.addLink(new LinkDto("delete-book","/books/" + isbn, "DELETE"));
 		bookResponse.addLink(new LinkDto("create-review","/books/" + isbn + "/reviews", "POST"));
-		if(book.getReviews()!=null)
+		if(allreviews.size()>0)
 			bookResponse.addLink(new LinkDto("view-all-reviews", "/books/" + isbn + "/reviews", "GET"));
 		return Response.ok(bookResponse).build();
 
@@ -163,11 +164,11 @@ public class BookResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Timed(name = "create-review")
 
-	public Response createBookReview(@PathParam("isbn") LongParam isbn,Reviews review)
+	public Response createBookReview(@PathParam("isbn") LongParam isbn,@Valid Reviews review)
 	{
 		System.out.println("Inside review 1");
 		Reviews rev = new Reviews();
-		Long rev_id = rev.create_revid();
+		Long rev_id = rev.createRevID();
 		review.setID(rev_id);
 		ReviewMap.put(rev_id, review);
 		allreviews.add(review);

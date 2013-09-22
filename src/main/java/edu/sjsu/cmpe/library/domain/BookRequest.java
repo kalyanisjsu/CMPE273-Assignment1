@@ -2,18 +2,29 @@ package edu.sjsu.cmpe.library.domain;
 
 import java.util.ArrayList;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class BookRequest {
 
-	public String title,language,status;
-	ArrayList<Reviews> reviews = new ArrayList<Reviews>();
 	
-	@JsonProperty("publication-date") private String publication_date;
+	@NotEmpty
+	@JsonProperty("title") public String title;
+	@NotEmpty
+	@JsonProperty("publication-date") public String publication_date;
+	
+	public String language,status;
+	ArrayList<Reviews> reviews = new ArrayList<Reviews>();
 	@JsonProperty("num-pages")private int num_pages;
 	public ArrayList<Author> authors = new ArrayList();
 	
+	public BookRequest(@JsonProperty("title") String title, @JsonProperty("publication-date") String publication_date, @JsonProperty("status") String status) {
+		this.title = title;
+		this.publication_date=publication_date;
+		this.status = "available";
+	}
 	
 	
 	public ArrayList<Reviews> getReviews() {

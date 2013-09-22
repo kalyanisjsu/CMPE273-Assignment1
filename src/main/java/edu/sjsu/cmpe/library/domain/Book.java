@@ -38,9 +38,7 @@ public class Book
 	public static HashMap<Long, ArrayList> BookAuthorsMap = new HashMap<Long, ArrayList>();
 	@JsonProperty("publication-date") private String publication_date;
 	@JsonProperty("num-pages")private int num_pages;
-
-	
-	
+	Random randomGenerator;
 
 	public ArrayList<Reviews> getReviews() {
 		return reviews;
@@ -65,7 +63,7 @@ public class Book
 	
 	public Book(String title1, ArrayList<Author> authors2, String lang, int num_pages, String pub_date, String status, ArrayList<Reviews> reviews) {
 		
-		Random randomGenerator = new Random();
+		randomGenerator = new Random();
 		isbn = (long) randomGenerator.nextInt(100);
 		this.title = title1;
 		this.language = lang;
