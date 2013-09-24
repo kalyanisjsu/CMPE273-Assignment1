@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import edu.sjsu.cmpe.library.domain.Reviews;
 
-public class ReviewsDto {
+public class ReviewsDto extends LinksDto{
 
 	 public ArrayList  reviews=null;
 	 

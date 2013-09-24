@@ -27,14 +27,19 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.omg.CORBA.ExceptionList;
+
 import net.sf.json.JSONArray;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.server.impl.application.ExceptionMapperFactory;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.dropwizard.jersey.params.LongParam;
+import com.yammer.dropwizard.validation.ValidationMethod;
 import com.yammer.metrics.annotation.Timed;
 
 import edu.sjsu.cmpe.library.LibraryService;
@@ -46,10 +51,9 @@ import edu.sjsu.cmpe.library.dto.AuthorDto;
 import edu.sjsu.cmpe.library.dto.AuthorsDto;
 import edu.sjsu.cmpe.library.dto.BookDto;
 import edu.sjsu.cmpe.library.dto.LinkDto;
+import edu.sjsu.cmpe.library.dto.LinksDto;
 import edu.sjsu.cmpe.library.dto.ReviewDto;
 import edu.sjsu.cmpe.library.dto.ReviewsDto;
-
-
 
 @Path("/v1/books")
 @Produces(MediaType.APPLICATION_JSON)
@@ -75,17 +79,25 @@ public class BookResource {
 
 	public Response getBookByIsbn(@PathParam("isbn") LongParam isbn) throws JsonParseException, JsonMappingException, IOException
 	{
-		System.out.println("Inside get" +isbn + isbn.get());
-		System.out.println(book_map.size());
-		Book book = (Book) book_map.get(isbn.get());
-		BookDto bookResponse = new BookDto(book);
-		bookResponse.addLink(new LinkDto("view-book", "/books/" + isbn,"GET"));
-		bookResponse.addLink(new LinkDto("update-book","/books/" + isbn, "PUT"));
-		bookResponse.addLink(new LinkDto("delete-book","/books/" + isbn, "DELETE"));
-		bookResponse.addLink(new LinkDto("create-review","/books/" + isbn +"/reviews", "POST"));
-		if(allreviews.size()>0)
-		bookResponse.addLink(new LinkDto("view-all-reviews","/books/" + isbn + "/reviews", "GET"));
-		return Response.ok(bookResponse).build();
+		try
+		{
+			System.out.println("Inside get" +isbn.get());
+			System.out.println(book_map.size());
+			Book book = (Book) book_map.get(isbn.get());
+			System.out.println(book.getTitle());
+			BookDto bookResponse = new BookDto(book);
+			bookResponse.addLink(new LinkDto("view-book", "/books/" + isbn,"GET"));
+			bookResponse.addLink(new LinkDto("update-book","/books/" + isbn, "PUT"));
+			bookResponse.addLink(new LinkDto("delete-book","/books/" + isbn, "DELETE"));
+			bookResponse.addLink(new LinkDto("create-review","/books/" + isbn +"/reviews", "POST"));
+			if(allreviews.size()>0)
+				bookResponse.addLink(new LinkDto("view-all-reviews","/books/" + isbn + "/reviews", "GET"));
+			return Response.ok(bookResponse).build();
+		}
+		catch(Exception e )
+		{
+			return Response.ok("Book doesn't exist").build();
+		}
 
 	}
 
@@ -105,6 +117,11 @@ public class BookResource {
 		Map<Long,Author> authorMap =  new HashMap<Long, Author>();
 		for(Author author: bookRequest.getAuthors())
 		{
+			System.out.println("**** " + isAuthorNameEmpty(author));
+			if(isAuthorNameEmpty(author))
+			{
+				return Response.created(null).entity("Please enter Author name").build();
+			}
 			Long author_id = author.createAuthorID();
 			authorMap.put(author_id, author);
 			authors.add(new LinkDto("view-author","/books/" + new_isbn + "/authors/" + author_id , "GET"));
@@ -113,12 +130,22 @@ public class BookResource {
 		book.setAuthors(authors);
 		bookAuthorMap.put(new_isbn, authorMap);
 		System.out.println("bookAuthorMap" + bookAuthorMap.size() +authorMap.size() );
-		BookDto bookResponse = new BookDto(book);
-		bookResponse.addLink(new LinkDto("view-book", "/books/" + new_isbn,"GET"));
-		bookResponse.addLink(new LinkDto("update-book","/books/" + new_isbn, "PUT"));
-		bookResponse.addLink(new LinkDto("delete-book","/books/" + new_isbn, "PUT"));
-		bookResponse.addLink(new LinkDto("create-review","/books/" + new_isbn + "/reviews", "POST"));
-		return Response.created(null).entity(bookResponse).build();
+		LinksDto linkResponse = new LinksDto();
+		//BookDto bookResponse = new BookDto();
+		linkResponse.addLink(new LinkDto("view-book", "/books/" + new_isbn,"GET"));
+		linkResponse.addLink(new LinkDto("update-book","/books/" + new_isbn, "PUT"));
+		linkResponse.addLink(new LinkDto("delete-book","/books/" + new_isbn, "PUT"));
+		linkResponse.addLink(new LinkDto("create-review","/books/" + new_isbn + "/reviews", "POST"));
+		return Response.created(null).entity(linkResponse).build();
+	}
+
+
+
+	public boolean isAuthorNameEmpty(Author author) {
+		if(author.getName().isEmpty())
+			return true;
+
+		return false;
 	}
 
 	@DELETE
@@ -127,13 +154,21 @@ public class BookResource {
 
 	public Response deleteBook(@PathParam("isbn") LongParam isbn) throws JsonGenerationException, JsonMappingException, IOException 
 	{
+		try
+		{
 		System.out.println("Inside delete");
 		System.out.println(book_map.size());
-		Book book = (Book) book_map.get(isbn.get());
 		book_map.remove(isbn.get());
-		BookDto bookResponse = new BookDto(book);
-		bookResponse.addLink(new LinkDto("create-book", "/books/","POST"));
-		return Response.ok(bookResponse).build();
+		BookReviewMap.remove(isbn.get());
+		LinksDto linkResponse = new LinksDto();
+		//BookDto bookResponse = new BookDto();
+		linkResponse.addLink(new LinkDto("create-book", "/books/","POST"));
+		return Response.ok(linkResponse).build();
+		}
+		catch(Exception e)
+		{
+			return Response.ok("Please check Book ID").build();
+		}
 
 	}
 
@@ -146,16 +181,21 @@ public class BookResource {
 		System.out.println("Inside update");
 		System.out.println(book_map.size());
 		Book book = (Book) book_map.get(isbn.get());
-		book.setStatus(status);
-		BookDto bookResponse = new BookDto(book);
-		bookResponse.addLink(new LinkDto("view-book", "/books/" + isbn,"GET"));
-		bookResponse.addLink(new LinkDto("update-book","/books/" + isbn, "PUT"));
-		bookResponse.addLink(new LinkDto("delete-book","/books/" + isbn, "DELETE"));
-		bookResponse.addLink(new LinkDto("create-review","/books/" + isbn + "/reviews", "POST"));
-		if(allreviews.size()>0)
-			bookResponse.addLink(new LinkDto("view-all-reviews", "/books/" + isbn + "/reviews", "GET"));
-		return Response.ok(bookResponse).build();
-
+		if(status.equalsIgnoreCase("available")||status.equalsIgnoreCase("lost")||status.equalsIgnoreCase("checked-out")||status.equalsIgnoreCase("in-queue"))
+		{
+			book.setStatus(status);
+			LinksDto linkResponse = new LinksDto();
+			//BookDto bookResponse = new BookDto();
+			linkResponse.addLink(new LinkDto("view-book", "/books/" + isbn,"GET"));
+			linkResponse.addLink(new LinkDto("update-book","/books/" + isbn, "PUT"));
+			linkResponse.addLink(new LinkDto("delete-book","/books/" + isbn, "DELETE"));
+			linkResponse.addLink(new LinkDto("create-review","/books/" + isbn + "/reviews", "POST"));
+			if(allreviews.size()>0)
+				linkResponse.addLink(new LinkDto("view-all-reviews", "/books/" + isbn + "/reviews", "GET"));
+			return Response.ok(linkResponse).build();
+		}
+		else
+			return Response.ok("Please enter valid status (available/checked-out/in-queue/lost)").build();
 	}
 
 	@POST
@@ -165,8 +205,11 @@ public class BookResource {
 	@Timed(name = "create-review")
 
 	public Response createBookReview(@PathParam("isbn") LongParam isbn,@Valid Reviews review)
-	{
+	{	
+		try
+		{
 		System.out.println("Inside review 1");
+		Book book = (Book) book_map.get(isbn.get());
 		Reviews rev = new Reviews();
 		Long rev_id = rev.createRevID();
 		review.setID(rev_id);
@@ -175,9 +218,15 @@ public class BookResource {
 		BookReviewMap.put(isbn.get(), allreviews);
 		BookSpecReviewMap.put(isbn.get(),ReviewMap);
 		System.out.println(BookSpecReviewMap.size());
-		ReviewDto revResponse = new ReviewDto();
-		revResponse.addLink(new LinkDto("view-review", "/books/" + isbn + "/reviews/" + rev_id,"GET"));
-		return Response.created(null).entity(revResponse).build();
+		//ReviewDto revResponse = new ReviewDto();
+		LinksDto linkResponse = new LinksDto();
+		linkResponse.addLink(new LinkDto("view-review", "/books/" + isbn + "/reviews/" + rev_id,"GET"));
+		return Response.created(null).entity(linkResponse).build();
+		}
+		catch(Exception e)
+		{
+			return Response.created(null).entity("Please check Book ID").build();
+		}
 	}
 
 	@GET
@@ -187,11 +236,18 @@ public class BookResource {
 	@Timed(name = "view-review")
 	public Response getBookReview(@PathParam("isbn") LongParam isbn,@PathParam("id") LongParam id)
 	{
+		try
+		{
 		System.out.println("**** " + BookSpecReviewMap.size());
 		Reviews reviews = BookSpecReviewMap.get(isbn.get()).get(id.get());
 		ReviewDto revResponse = new ReviewDto(reviews);
 		revResponse.addLink(new LinkDto("view-review", "/books/" + isbn + "/reviews/" + id ,"GET"));
 		return Response.ok(revResponse).build();
+		}
+		catch(Exception e)
+		{
+			return Response.ok("Please check Book ID / Review ID ").build();
+		}
 
 	}
 
@@ -203,10 +259,17 @@ public class BookResource {
 
 	public Response getAllReview(@PathParam("isbn") LongParam isbn)
 	{
-		System.out.println("Inside all review" + BookReviewMap.get(isbn.get()));
-		ArrayList reviews = BookReviewMap.get(isbn.get());
-		ReviewsDto reviewsResponse = new ReviewsDto(reviews);
-		return Response.ok(reviewsResponse).build();
+		try
+		{
+			System.out.println("Inside all review" + BookReviewMap.get(isbn.get()));
+			ArrayList reviews = BookReviewMap.get(isbn.get());
+			ReviewsDto reviewsResponse = new ReviewsDto(reviews);
+			return Response.ok(reviewsResponse).build();
+		}
+		catch(Exception e)
+		{
+			return Response.ok("Book doesn't exist").build();	
+		}
 	}
 
 	@GET
@@ -215,11 +278,18 @@ public class BookResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Timed(name = "view-author")
 	public Response getBookAuthor(@PathParam("isbn") LongParam isbn,@PathParam("id") LongParam id)
-	{
-		Author author=bookAuthorMap.get(isbn.get()).get(id.get());
-		AuthorDto authResponse = new AuthorDto(author);
-		authResponse.addLink(new LinkDto("view-author", "/books/" + isbn + "/authors/" + id ,"GET"));
-		return Response.ok(authResponse).build();
+	{	
+		try
+		{
+			Author author=bookAuthorMap.get(isbn.get()).get(id.get());
+			AuthorDto authResponse = new AuthorDto(author);
+			authResponse.addLink(new LinkDto("view-author", "/books/" + isbn + "/authors/" + id ,"GET"));
+			return Response.ok(authResponse).build();
+		}
+		catch(Exception e)
+		{
+			return Response.ok("Please check Book ID / Author ID ").build();
+		}
 	}
 
 
@@ -232,12 +302,17 @@ public class BookResource {
 
 	public Response getAllAuthors(@PathParam("isbn") LongParam isbn)
 	{
-		System.out.println("Inside all authors");
-		Map<Long, Author> authorDetails = bookAuthorMap.get(isbn.get());
-
-		//	ArrayList<Author> allauthors = Book.BookAuthorsMap.get(isbn.get());
-		AuthorsDto authorsResponse = new AuthorsDto(authorDetails.values());
-		return Response.ok(authorsResponse).build();
+		try
+		{
+			System.out.println("Inside all authors");
+			Map<Long, Author> authorDetails = bookAuthorMap.get(isbn.get());
+			AuthorsDto authorsResponse = new AuthorsDto(authorDetails.values());
+			return Response.ok(authorsResponse).build();
+		}
+		catch(Exception e)
+		{
+			return Response.ok("Book doesn't exist").build();
+		}
 	}
 
 

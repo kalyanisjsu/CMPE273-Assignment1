@@ -1,6 +1,11 @@
 package edu.sjsu.cmpe.library.domain;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Pattern.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -9,15 +14,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BookRequest {
 
-	
+
 	@NotEmpty
 	@JsonProperty("title") public String title;
 	@NotEmpty
 	@JsonProperty("publication-date") public String publication_date;
+	//@Pattern(regexp = "[lost]|[available]")
+	//@JsonProperty public String status;
+	
+	//@List(value= {@Pattern(regexp="available")|| @Pattern(regexp="checked-out"), @Pattern(regexp="in-queue"), @Pattern(regexp="lost")})
 	
 	public String language,status;
 	ArrayList<Reviews> reviews = new ArrayList<Reviews>();
 	@JsonProperty("num-pages")private int num_pages;
+	@Valid
 	public ArrayList<Author> authors = new ArrayList();
 	
 	public BookRequest(@JsonProperty("title") String title, @JsonProperty("publication-date") String publication_date, @JsonProperty("status") String status) {

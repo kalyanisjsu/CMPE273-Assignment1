@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.sjsu.cmpe.library.LibraryService;
+import edu.sjsu.cmpe.library.api.resources.BookResource;
 import edu.sjsu.cmpe.library.dto.AuthorDto;
 import edu.sjsu.cmpe.library.dto.AuthorsDto;
 import edu.sjsu.cmpe.library.dto.LinkDto;
@@ -40,29 +41,14 @@ public class Book
 	@JsonProperty("num-pages")private int num_pages;
 	Random randomGenerator;
 
-	public ArrayList<Reviews> getReviews() {
-		return reviews;
-	}
-
-	public void setReviews(ArrayList<Reviews> reviews) {
-		this.reviews = reviews;
-	}
-
-	public ArrayList<LinkDto> getAuthors() {
-		return authors;
-	}
-
-	public void setAuthors(ArrayList<LinkDto> authors) {
-		this.authors = authors;
-	}
 
 	public Book()
 	{
 
 	}
-	
+
 	public Book(String title1, ArrayList<Author> authors2, String lang, int num_pages, String pub_date, String status, ArrayList<Reviews> reviews) {
-		
+
 		randomGenerator = new Random();
 		isbn = (long) randomGenerator.nextInt(100);
 		this.title = title1;
@@ -71,6 +57,32 @@ public class Book
 		this.publication_date = pub_date;
 		this.status=status;
 		this.reviews=reviews;
+	}
+
+
+	public ArrayList<Reviews> getReviews() {
+
+		if(!BookResource.allreviews.isEmpty())
+		{
+			System.out.println("***Not empty*** ");
+			return BookResource.allreviews;
+		}
+		else
+
+			return reviews;
+	}
+
+	public void setReviews(ArrayList<Reviews> reviews) {
+
+		this.reviews=reviews;
+	}
+
+	public ArrayList<LinkDto> getAuthors() {
+		return authors;
+	}
+
+	public void setAuthors(ArrayList<LinkDto> authors) {
+		this.authors = authors;
 	}
 
 	public void setIsbn(long isbn) {

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.validation.constraints.NotNull;
+
 import edu.sjsu.cmpe.library.dto.LinkDto;
 import edu.sjsu.cmpe.library.dto.LinksDto;
 
@@ -33,7 +35,8 @@ public class Author{
 		public Long getID() {
 			return ID;
 		}
-
+		
+		@NotNull
 		public String getName() {
 			return Name;
 		}
