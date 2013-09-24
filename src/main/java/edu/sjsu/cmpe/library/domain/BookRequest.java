@@ -1,11 +1,11 @@
 package edu.sjsu.cmpe.library.domain;
 
-import java.lang.reflect.Array;
+
+
 import java.util.ArrayList;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Pattern.List;
+
 
 import org.hibernate.validator.constraints.NotEmpty;
 
