@@ -1,7 +1,7 @@
 package edu.sjsu.cmpe.library.dto;
 
 import edu.sjsu.cmpe.library.domain.Author;
-import edu.sjsu.cmpe.library.domain.Reviews;
+
 
 public class AuthorDto extends LinksDto {
 

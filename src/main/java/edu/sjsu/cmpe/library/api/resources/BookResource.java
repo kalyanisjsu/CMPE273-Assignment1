@@ -1,18 +1,10 @@
 package edu.sjsu.cmpe.library.api.resources;
 
 import java.lang.Object;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -25,24 +17,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.omg.CORBA.ExceptionList;
-
-import net.sf.json.JSONArray;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.jersey.server.impl.application.ExceptionMapperFactory;
-import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.dropwizard.jersey.params.LongParam;
-import com.yammer.dropwizard.validation.ValidationMethod;
 import com.yammer.metrics.annotation.Timed;
-
-import edu.sjsu.cmpe.library.LibraryService;
 import edu.sjsu.cmpe.library.domain.Author;
 import edu.sjsu.cmpe.library.domain.Book;
 import edu.sjsu.cmpe.library.domain.BookRequest;

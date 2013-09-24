@@ -1,27 +1,12 @@
 package edu.sjsu.cmpe.library.domain;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
-
-import javax.sound.sampled.ReverbType;
-
-import org.json.simple.JSONObject;
-
-import net.sf.json.JSONArray;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import edu.sjsu.cmpe.library.LibraryService;
 import edu.sjsu.cmpe.library.api.resources.BookResource;
-import edu.sjsu.cmpe.library.dto.AuthorDto;
-import edu.sjsu.cmpe.library.dto.AuthorsDto;
 import edu.sjsu.cmpe.library.dto.LinkDto;
-import edu.sjsu.cmpe.library.dto.LinksDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 
